@@ -7,44 +7,47 @@
   <title>NEWCAFE — Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    :root { color-scheme: dark; --bg:#17120e; --card:#251d17; --card2:#30241b; --accent:#e0ad72; --muted:#c7b9aa; --line:#493729; }
+    :root { color-scheme: dark; --bg:#120e0b; --card:#211913; --accent:#f0b879; --muted:#c9b9a8; --line:#493526; --green:#bdd6a0; }
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { margin:0; padding:16px 16px calc(92px + env(safe-area-inset-bottom)); background:radial-gradient(ellipse at 50% -10%,#49301d 0,transparent 42%),var(--bg); color:#fff8f0; font:16px/1.45 system-ui,sans-serif; }
+    body { margin:0; min-height:100vh; padding:16px 16px calc(94px + env(safe-area-inset-bottom)); background:radial-gradient(ellipse at 12% 0%,rgba(150,91,46,.30),transparent 35%),radial-gradient(ellipse at 100% 30%,rgba(77,102,70,.15),transparent 32%),linear-gradient(160deg,#17110d 0%,#100d0b 55%,#19120d 100%); color:#fff8f0; font:16px/1.45 system-ui,-apple-system,sans-serif; }
     main { max-width:560px; margin:0 auto; }
     .brand { display:flex; align-items:center; gap:11px; }
-    .logo { display:grid; place-items:center; width:48px; height:48px; flex:none; border:1px solid #735438; border-radius:16px; background:linear-gradient(145deg,#45301e,#241910); color:var(--accent); }
+    .logo { display:grid; place-items:center; width:48px; height:48px; flex:none; border:1px solid #795638; border-radius:16px; background:linear-gradient(145deg,#54351f,#21160f); color:var(--accent); box-shadow:0 6px 20px #0005; }
     .logo svg { width:29px; height:29px; }
-    .brand-name { margin:0; color:var(--accent); font-size:18px; font-weight:800; letter-spacing:1.6px; }
+    .brand-name { margin:0; color:var(--accent); font-size:18px; font-weight:850; letter-spacing:1.6px; }
     .brand-tag { margin:0; color:var(--muted); font-size:12px; }
-    header { padding:8px 2px 20px; }
-    .welcome { margin-top:20px; padding:19px; border:1px solid #5b402a; border-radius:20px; background:linear-gradient(120deg,rgba(74,49,29,.92),rgba(37,29,23,.94)); box-shadow:0 12px 30px #0003; }
-    .welcome-kicker { margin:0 0 5px; color:var(--accent); font-size:13px; font-weight:700; }
-    .welcome h1 { margin:0 0 7px; font-size:25px; line-height:1.2; }
-    .welcome p:last-child { margin:0; color:#e0d2c3; font-size:14px; }
-    .section-title { margin:20px 2px 10px; font-size:19px; }
+    header { padding:8px 2px 14px; }
+    .welcome { position:relative; overflow:hidden; margin-top:18px; padding:21px 19px; border:1px solid #63442b; border-radius:22px; background:linear-gradient(115deg,rgba(84,53,31,.96),rgba(40,29,21,.96) 68%,rgba(35,42,29,.9)); box-shadow:0 15px 34px #0005; }
+    .welcome::after { content:'☕'; position:absolute; right:14px; bottom:-29px; color:#f0b87918; font-size:120px; transform:rotate(-15deg); pointer-events:none; }
+    .welcome-kicker { position:relative; z-index:1; margin:0 0 5px; color:var(--accent); font-size:13px; font-weight:750; }
+    .welcome h1 { position:relative; z-index:1; margin:0 0 7px; font-size:26px; line-height:1.2; }
+    .welcome p:last-child { position:relative; z-index:1; max-width:290px; margin:0; color:#e4d4c3; font-size:14px; }
+    .student-note { display:inline-flex; align-items:center; gap:6px; margin-top:14px; padding:6px 10px; border:1px solid #66804d70; border-radius:999px; background:#34452a50; color:#d5e8bd; font-size:12px; }
+    .section-title { margin:18px 2px 8px; font-size:19px; }
     .menu { display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; scrollbar-width:none; }
-    .menu::-webkit-scrollbar { display:none; }
-    .menu button, .filter button { flex:none; border:1px solid var(--line); border-radius:999px; padding:9px 13px; background:var(--card); color:#fff8f0; font-size:13px; font-weight:650; cursor:pointer; }
-    .menu button.active, .filter button.active { border-color:var(--accent); background:#49321f; color:#ffe0b9; }
+    .menu::-webkit-scrollbar,.filter::-webkit-scrollbar { display:none; }
+    .menu button,.filter button { flex:none; border:1px solid var(--line); border-radius:999px; padding:9px 13px; background:#211913; color:#fff8f0; font-size:13px; font-weight:650; cursor:pointer; }
+    .menu button.active,.filter button.active { border-color:var(--accent); background:#49321f; color:#ffe0b9; }
     .filter { display:flex; gap:8px; overflow-x:auto; padding:2px 1px 9px; scrollbar-width:none; }
     .filter button { padding:8px 12px; color:var(--muted); }
-    .product { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:10px 0; padding:15px; border:1px solid var(--line); border-radius:17px; background:linear-gradient(145deg,var(--card2),var(--card)); }
-    .product h3 { margin:0 0 4px; font-size:16px; }
-    .product p { margin:0; color:var(--muted); font-size:13px; }
-    .price { margin-top:7px; color:var(--accent); font-weight:750; font-size:14px; }
-    .controls { display:flex; align-items:center; gap:9px; white-space:nowrap; }
+    .product { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:9px 0; padding:14px; border:1px solid #493729; border-radius:17px; background:linear-gradient(145deg,rgba(47,34,25,.98),rgba(31,23,18,.98)); box-shadow:0 7px 18px #0002; }
+    .product h3 { margin:0 0 4px; font-size:15px; }
+    .product p { margin:0; color:var(--muted); font-size:12px; }
+    .price { margin-top:7px; color:var(--accent); font-weight:780; font-size:14px; }
+    .badge { display:inline-block; margin-left:5px; padding:2px 6px; border-radius:999px; background:#435136; color:#d7e9bd; font-size:10px; vertical-align:2px; }
+    .controls { display:flex; align-items:center; gap:8px; white-space:nowrap; }
     button { font-family:inherit; }
-    .controls button { width:38px; height:38px; border:1px solid #745437; border-radius:12px; background:#49321f; color:#ffe0b9; font-size:21px; cursor:pointer; }
-    .controls span { min-width:16px; text-align:center; font-weight:700; }
-    #summary { scroll-margin-top:16px; margin:17px 0 12px; padding:16px; border:1px solid var(--line); border-radius:16px; background:var(--card); }
+    .controls button { width:36px; height:36px; border:1px solid #745437; border-radius:12px; background:#49321f; color:#ffe0b9; font-size:20px; cursor:pointer; }
+    .controls span { min-width:15px; text-align:center; font-weight:700; }
+    #summary { scroll-margin-top:16px; margin:16px 0 12px; padding:16px; border:1px solid var(--line); border-radius:17px; background:#211913; }
     #summary h2 { margin:0 0 8px; font-size:17px; }
     #summary p { margin:5px 0; color:var(--muted); }
     #summary #total { color:#fff8f0; font-weight:750; }
-    #send { width:100%; min-height:50px; border:0; border-radius:14px; background:var(--accent); color:#1b130d; font-weight:750; font-size:15px; cursor:pointer; }
+    #send { width:100%; min-height:50px; border:0; border-radius:14px; background:linear-gradient(100deg,#f1c286,#d99b5b); color:#21160e; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 7px 18px #d99b5b20; }
     #status { min-height:24px; margin-top:10px; color:var(--accent); text-align:center; font-size:14px; }
     .hint { margin:12px 0 0; color:var(--muted); text-align:center; font-size:12px; }
-    .bottom-menu { position:fixed; z-index:5; right:0; bottom:0; left:0; padding:9px 12px calc(9px + env(safe-area-inset-bottom)); border-top:1px solid #493729; background:rgba(23,18,14,.96); backdrop-filter:blur(14px); }
+    .bottom-menu { position:fixed; z-index:5; right:0; bottom:0; left:0; padding:8px 12px calc(8px + env(safe-area-inset-bottom)); border-top:1px solid #493729; background:rgba(18,14,11,.96); backdrop-filter:blur(14px); }
     .bottom-menu-inner { display:flex; justify-content:space-around; gap:5px; max-width:560px; margin:auto; }
     .bottom-menu button { min-width:62px; padding:5px 7px; border:0; background:transparent; color:var(--muted); font-size:11px; cursor:pointer; }
     .bottom-menu button span { display:block; margin-bottom:2px; font-size:19px; }
@@ -54,37 +57,42 @@
     dialog h2 { margin:0 0 10px; color:var(--accent); }
     dialog p { color:var(--muted); }
     dialog button { width:100%; padding:12px; border:0; border-radius:12px; background:var(--accent); color:#1b130d; font-weight:700; }
+    @media (max-width:380px) { body { padding-right:12px; padding-left:12px; } .product { padding:12px; } .controls { gap:5px; } .controls button { width:33px; height:33px; } }
   </style>
 </head>
 <body>
   <main>
     <header>
       <div class="brand">
-        <div class="logo" aria-label="NEWCAFE logotipi">
-          <svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 12h16v8a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-8Z" stroke="currentColor" stroke-width="2"/><path d="M23 14h2a3 3 0 0 1 0 6h-2M5 29h22M12 8c-2-2 2-3 0-5m6 5c-2-2 2-3 0-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
+        <div class="logo" aria-label="NEWCAFE logotipi"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 12h16v8a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6v-8Z" stroke="currentColor" stroke-width="2"/><path d="M23 14h2a3 3 0 0 1 0 6h-2M5 29h22M12 8c-2-2 2-3 0-5m6 5c-2-2 2-3 0-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
         <div><p class="brand-name">NEWCAFE</p><p class="brand-tag">Yangi ta'm. Yangi energiya.</p></div>
       </div>
       <section class="welcome" aria-label="Xush kelibsiz">
         <p class="welcome-kicker">☕ Xush kelibsiz</p>
         <h1 id="greeting">Salom!</h1>
-        <p>Bugun kayfiyatingizga mos qahvani tanlang.</p>
+        <p>Dars, ish yoki tanaffus — kayfiyatingizga mosini tanlang.</p>
+        <span class="student-note">🎓 Talabalar uchun hamyonbop tanlovlar</span>
       </section>
     </header>
 
     <nav class="menu" aria-label="Bo'limlar">
       <button class="active" type="button" data-view="menu">☕ Menyu</button>
+      <button type="button" data-view="offers">🎓 Talaba setlari</button>
       <button type="button" data-view="cart">🛍 Savatcha</button>
       <button type="button" data-view="about">ℹ️ Biz haqimizda</button>
       <button type="button" data-view="contact">📞 Aloqa</button>
     </nav>
 
     <section id="menuSection" aria-label="Mahsulotlar">
-      <h2 class="section-title">Menyudan tanlang</h2>
+      <h2 class="section-title" id="menuTitle">Menyudan tanlang</h2>
       <div class="filter" aria-label="Mahsulot kategoriyalari">
         <button class="active" type="button" data-category="all">Barchasi</button>
-        <button type="button" data-category="coffee">☕ Qahvalar</button>
+        <button type="button" data-category="budget">💸 Hamyonbop</button>
+        <button type="button" data-category="coffee">☕ Qahva</button>
         <button type="button" data-category="milk">🥛 Sutli</button>
+        <button type="button" data-category="iced">🧊 Sovuq</button>
+        <button type="button" data-category="tea">🍵 Choy</button>
+        <button type="button" data-category="snack">🥐 Yegulik</button>
         <button type="button" data-category="premium">✨ Premium</button>
       </div>
       <div id="products"></div>
@@ -96,20 +104,14 @@
     <p class="hint">Namoyish loyihasi: to'lov va yetkazib berish yo'q.</p>
   </main>
 
-  <nav class="bottom-menu" aria-label="Pastki menyu">
-    <div class="bottom-menu-inner">
-      <button class="active" type="button" data-view="menu"><span>⌂</span>Bosh sahifa</button>
-      <button type="button" data-view="menu"><span>☕</span>Menyu</button>
-      <button type="button" data-view="cart"><span>🛍</span>Savatcha <b id="cartCount"></b></button>
-      <button type="button" data-view="contact"><span>☎</span>Aloqa</button>
-    </div>
-  </nav>
+  <nav class="bottom-menu" aria-label="Pastki menyu"><div class="bottom-menu-inner">
+    <button class="active" type="button" data-view="menu"><span>⌂</span>Bosh sahifa</button>
+    <button type="button" data-view="menu"><span>☕</span>Menyu</button>
+    <button type="button" data-view="cart"><span>🛍</span>Savatcha <b id="cartCount"></b></button>
+    <button type="button" data-view="contact"><span>☎</span>Aloqa</button>
+  </div></nav>
 
-  <dialog id="infoDialog">
-    <h2 id="dialogTitle"></h2>
-    <p id="dialogText"></p>
-    <button id="closeDialog" type="button">Yopish</button>
-  </dialog>
+  <dialog id="infoDialog"><h2 id="dialogTitle"></h2><p id="dialogText"></p><button id="closeDialog" type="button">Yopish</button></dialog>
 
   <script>
     (() => {
@@ -120,9 +122,22 @@
       if (userName) document.getElementById('greeting').textContent = `Salom, ${userName}!`;
 
       const products = [
-        { id: 'classic', name: 'NEWCAFE Classic', description: 'Klassik eruvchan qahva.', price: 25000, emoji: '☕', category: 'coffee' },
-        { id: 'gold', name: 'NEWCAFE Gold', description: 'Yumshoq ta\'mli premium qahva.', price: 35000, emoji: '✨', category: 'premium' },
-        { id: 'latte', name: 'NEWCAFE Latte', description: 'Sutli qahva ichimligi.', price: 18000, emoji: '🥛', category: 'milk' },
+        { id:'classic', name:'NEWCAFE Classic', description:'Klassik eruvchan qahva.', price:18000, emoji:'☕', category:'coffee', budget:true },
+        { id:'gold', name:'NEWCAFE Gold', description:'Yumshoq ta\'mli premium qahva.', price:30000, emoji:'✨', category:'premium' },
+        { id:'latte', name:'NEWCAFE Latte', description:'Sutli, mayin qahva ichimligi.', price:22000, emoji:'🥛', category:'milk' },
+        { id:'americano', name:'Americano', description:'Espresso va issiq suv — yengil, tetik ta\'m.', price:16000, emoji:'☕', category:'coffee', budget:true },
+        { id:'espresso', name:'Espresso', description:'Kichik finjonda kuchli qahva.', price:14000, emoji:'⚡', category:'coffee', budget:true },
+        { id:'cappuccino', name:'Cappuccino', description:'Espresso, sut va yumshoq ko\'pik.', price:23000, emoji:'☁️', category:'milk' },
+        { id:'mocha', name:'Mocha', description:'Qahva, sut va shokolad uyg\'unligi.', price:27000, emoji:'🍫', category:'milk' },
+        { id:'raf', name:'Raf Coffee', description:'Qaymoqli, mayin va xushbo\'y.', price:28000, emoji:'🤎', category:'premium' },
+        { id:'iced_latte', name:'Iced Latte', description:'Muzdek sutli qahva — issiq kunlar uchun.', price:24000, emoji:'🧊', category:'iced' },
+        { id:'cold_brew', name:'Cold Brew', description:'Sovuq usulda damlangan qahva.', price:25000, emoji:'🥤', category:'iced' },
+        { id:'black_tea', name:'Qora choy', description:'Limon bilan damlangan klassik choy.', price:8000, emoji:'🍵', category:'tea', budget:true },
+        { id:'green_tea', name:'Ko\'k choy', description:'Yengil va yoqimli issiq choy.', price:8000, emoji:'🍃', category:'tea', budget:true },
+        { id:'matcha', name:'Matcha Latte', description:'Matcha va sutli zamonaviy ichimlik.', price:26000, emoji:'🍵', category:'premium' },
+        { id:'croissant', name:'Kruassan', description:'Qahva bilan mos, yangi pishiriq.', price:14000, emoji:'🥐', category:'snack', budget:true },
+        { id:'cheesecake', name:'Cheesecake', description:'Tanaffusga shirin qo\'shimcha.', price:22000, emoji:'🍰', category:'snack' },
+        { id:'student_combo', name:'Talaba seti', description:'Americano + kruassan — dars oldidan qulay tanlov.', price:26000, emoji:'🎓', category:'budget', badge:'Talaba tanlovi' },
       ];
       const cart = Object.fromEntries(products.map(product => [product.id, 0]));
       const formatMoney = amount => new Intl.NumberFormat('uz-UZ').format(amount) + " so'm";
@@ -132,21 +147,16 @@
       let activeCategory = 'all';
 
       function render() {
-        const visibleProducts = products.filter(product => activeCategory === 'all' || product.category === activeCategory);
+        const visibleProducts = products.filter(product => activeCategory === 'all' || (activeCategory === 'budget' ? product.budget || product.category === 'budget' : product.category === activeCategory));
         productRoot.innerHTML = visibleProducts.map(product => `
-          <article class="product">
-            <div><h3>${product.emoji} ${product.name}</h3><p>${product.description}</p><div class="price">${formatMoney(product.price)}</div></div>
-            <div class="controls">
-              <button type="button" aria-label="Kamaytirish ${product.name}" data-action="minus" data-id="${product.id}">−</button>
-              <span>${cart[product.id]}</span>
-              <button type="button" aria-label="Qo'shish ${product.name}" data-action="plus" data-id="${product.id}">+</button>
-            </div>
+          <article class="product"><div><h3>${product.emoji} ${product.name}${product.badge ? `<span class="badge">${product.badge}</span>` : ''}</h3><p>${product.description}</p><div class="price">${formatMoney(product.price)}</div></div>
+            <div class="controls"><button type="button" aria-label="Kamaytirish ${product.name}" data-action="minus" data-id="${product.id}">−</button><span>${cart[product.id]}</span><button type="button" aria-label="Qo'shish ${product.name}" data-action="plus" data-id="${product.id}">+</button></div>
           </article>`).join('');
         const selected = products.filter(product => cart[product.id] > 0);
         const total = selected.reduce((sum, product) => sum + product.price * cart[product.id], 0);
         const quantity = selected.reduce((sum, product) => sum + cart[product.id], 0);
         document.getElementById('cartCount').textContent = quantity ? `(${quantity})` : '';
-        summary.innerHTML = `<h2>🛍 Savatchangiz</h2>` + (selected.length
+        summary.innerHTML = '<h2>🛍 Savatchangiz</h2>' + (selected.length
           ? `${selected.map(product => `<p>${product.name} × ${cart[product.id]}</p>`).join('')}<p id="total">Jami: ${formatMoney(total)}</p>`
           : '<p>Savatcha bo\'sh. Mahsulot miqdorini tanlang.</p>');
         document.getElementById('send').disabled = selected.length === 0;
@@ -158,9 +168,9 @@
         if (!button) return;
         activeCategory = button.dataset.category;
         document.querySelectorAll('.filter button').forEach(item => item.classList.toggle('active', item === button));
+        document.getElementById('menuTitle').textContent = activeCategory === 'budget' ? 'Talabalar uchun hamyonbop' : 'Menyudan tanlang';
         render();
       });
-
       productRoot.addEventListener('click', event => {
         const button = event.target.closest('button[data-action]');
         if (!button) return;
@@ -175,28 +185,35 @@
       }
       document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
         const view = button.dataset.view;
+        if (view === 'offers') {
+          activeCategory = 'budget';
+          document.querySelectorAll('.filter button').forEach(item => item.classList.toggle('active', item.dataset.category === 'budget'));
+          document.getElementById('menuTitle').textContent = 'Talabalar uchun hamyonbop';
+          render();
+          setActiveView('offers');
+          document.getElementById('menuSection').scrollIntoView({ behavior:'smooth' });
+          return;
+        }
         setActiveView(view);
-        if (view === 'menu') document.getElementById('menuSection').scrollIntoView({ behavior: 'smooth' });
-        if (view === 'cart') summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (view === 'menu') document.getElementById('menuSection').scrollIntoView({ behavior:'smooth' });
+        if (view === 'cart') summary.scrollIntoView({ behavior:'smooth', block:'center' });
         if (view === 'about' || view === 'contact') {
           document.getElementById('dialogTitle').textContent = view === 'about' ? 'NEWCAFE haqida' : 'Biz bilan aloqa';
           document.getElementById('dialogText').textContent = view === 'about'
-            ? 'NEWCAFE — qahvani sevuvchilar uchun yaratilgan zamonaviy kafe. Yangi ta\'m. Yangi energiya.'
+            ? 'NEWCAFE — dars, ish va tanaffus uchun mazali qahva hamda yengil tamaddilar. Yangi ta\'m. Yangi energiya.'
             : 'Savollaringiz bo\'lsa, Telegram orqali bot administratoriga yozing.';
           document.getElementById('infoDialog').showModal();
         }
       }));
       document.getElementById('closeDialog').addEventListener('click', () => document.getElementById('infoDialog').close());
-
       document.getElementById('send').addEventListener('click', () => {
-        const items = products.filter(product => cart[product.id] > 0)
-          .map(product => ({ id: product.id, qty: cart[product.id] }));
+        const items = products.filter(product => cart[product.id] > 0).map(product => ({ id:product.id, qty:cart[product.id] }));
         if (!items.length) return;
         if (!tg || typeof tg.sendData !== 'function') {
           status.textContent = 'Mini App Telegram ichidan ochilmagan. Botdagi Mini App tugmasidan qayta oching.';
           return;
         }
-        tg.sendData(JSON.stringify({ type: 'demo_order', items }));
+        tg.sendData(JSON.stringify({ type:'demo_order', items }));
         status.textContent = 'Buyurtma botga yuborildi.';
       });
       render();
