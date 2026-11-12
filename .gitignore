@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Test and tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
