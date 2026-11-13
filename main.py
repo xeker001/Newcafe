@@ -68,7 +68,7 @@ def mini_app_url() -> str | None:
 def inline_menu() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
+            [InlineKeyboardButton(text="☕ Mahsulotlar", callback_data="products")],
             [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
             [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
         ]
@@ -143,14 +143,10 @@ async def show_cart(message: Message, cart: dict[str, int]) -> None:
 async def start(message: Message) -> None:
     banner = ASSETS_DIR / "newcafe_banner.jpg"
     text = (
-        "☕ Assalomu alaykum!\n\n"
-        "NEWCAFE botiga xush kelibsiz! 👑\n\n"
-        "Bu yerda siz:\n"
-        "☕ Mazali kofelar menyusini ko'rishingiz;\n"
-        "🛒 O'zingizga yoqqan ichimlikni tanlashingiz;\n"
-        "✨ Yangi ta'mlardan bahramand bo'lishingiz mumkin.\n\n"
-        "NEWCAFE — Good Coffee, Good Mood!\n\n"
-        "👇 Menyuni ochish uchun tugmani bosing."
+        "☕ *NEWCAFE ga xush kelibsiz!*\n\n"
+        "Yangi ta'm. Yangi energiya.\n"
+        "Mahsulotlarimiz bilan tanishing yoki demo buyurtma yarating.\n\n"
+        "_Bu o'quv loyihasi uchun namoyish botidir._"
     )
     if banner.is_file():
         await message.answer_photo(banner, caption=text, reply_markup=inline_menu(), parse_mode=ParseMode.MARKDOWN)
@@ -288,18 +284,8 @@ async def handle_web_app_data(message: Message, bot: Bot) -> None:
             return
     total = sum(PRODUCTS[key]["price"] * quantity for key, quantity in quantities.items())
     details = "\n".join(f'{PRODUCTS[key]["name"]} × {quantity} — {money(PRODUCTS[key]["price"] * quantity)}' for key, quantity in quantities.items())
-    user = message.from_user
-    username = f"@{user.username}" if user and user.username else (user.full_name if user else "Unknown")
-    admin_id = int(os.environ["ADMIN_ID"])
-    try:
-        await bot.send_message(
-            admin_id,
-            f"🧾 Yangi demo buyurtma\nFoydalanuvchi: {username} (ID: {user.id if user else 'unknown'})\n\n{details}\n\nJami: {money(total)}",
-        )
-    except Exception:
-        logger.exception("Could not notify ADMIN_ID about a Mini App demo order")
     await message.answer(
-        f"✅ Demo buyurtmangiz qabul qilindi!\n\n{details}\n\nJami: {money(total)}\n\nBu namoyish buyurtmasi; ma'lumotlar bazasida saqlanmaydi."
+        f"✅ Rahmat! Buyurtmangiz qabul qilindi.\n\n{details}\n\nJami: {money(total)}\n\nBu namoyish loyihasi bo‘lib, to‘lov va yetkazib berish amalga oshirilmaydi."
     )
 
 
