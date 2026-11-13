@@ -68,7 +68,7 @@ def mini_app_url() -> str | None:
 def inline_menu() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="☕ Mahsulotlar", callback_data="products")],
+            [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
             [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
             [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
         ]
@@ -132,7 +132,7 @@ async def show_cart(message: Message, cart: dict[str, int]) -> None:
         lines.append(f'{item["emoji"]} {item["name"]} × {quantity} — {money(subtotal)}')
     text = "🛍 *Savatchangiz*\n\n" + "\n".join(lines) + f"\n\n*Jami: {money(total)}*"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Demo buyurtmani tasdiqlash", callback_data="checkout")],
+        [InlineKeyboardButton(text="✅ Buyurtmani tasdiqlash", callback_data="checkout")],
         [InlineKeyboardButton(text="🗑 Savatchani tozalash", callback_data="clear")],
         [InlineKeyboardButton(text="☕ Yana mahsulot tanlash", callback_data="products")],
         [InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")],
@@ -143,23 +143,24 @@ async def show_cart(message: Message, cart: dict[str, int]) -> None:
 async def start(message: Message) -> None:
     banner = ASSETS_DIR / "newcafe_banner.jpg"
     text = (
-        "☕ *NEWCAFE ga xush kelibsiz!*\n\n"
-        "Yangi ta'm. Yangi energiya.\n"
-        "Mahsulotlarimiz bilan tanishing yoki demo buyurtma yarating.\n\n"
-        "_Bu o'quv loyihasi uchun namoyish botidir._"
+        "☕ Assalomu alaykum!\n\n"
+        "NEWCAFE botiga xush kelibsiz! 👑\n\n"
+        "Bu yerda siz:\n"
+        "☕ Mazali kofelar menyusini ko‘rishingiz;\n"
+        "🛒 O‘zingizga yoqqan ichimlikni tanlashingiz;\n"
+        "✨ Yangi ta’mlardan bahramand bo‘lishingiz mumkin.\n\n"
+        "NEWCAFE — Good Coffee, Good Mood!\n\n"
+        "👇 Menyuni ochish uchun tugmani bosing."
     )
     if banner.is_file():
-        await message.answer_photo(banner, caption=text, reply_markup=inline_menu(), parse_mode=ParseMode.MARKDOWN)
+        await message.answer_photo(banner, caption=text, reply_markup=inline_menu())
     else:
-        await message.answer(text, reply_markup=inline_menu(), parse_mode=ParseMode.MARKDOWN)
+        await message.answer(text, reply_markup=inline_menu())
     web_keyboard = app_keyboard()
     if web_keyboard:
-        await message.answer(
-            "Mini App orqali demo buyurtma yuborishingiz mumkin. Buyurtmani botga qaytarish uchun Mini App ichidagi tugmadan foydalaning.",
-            reply_markup=web_keyboard,
-        )
-    else:
-        await message.answer("Mini App tugmasini yoqish uchun MINI_APP_URL muhit o'zgaruvchisini sozlang.")
+        await message.answer("🌐 To‘liq Mini App menyusini ham ochishingiz mumkin:", reply_markup=web_keyboard)
+    elif not mini_app_url():
+        logger.warning("MINI_APP_URL is not set; Mini App launch button will not be shown.")
 
 
 async def help_command(message: Message) -> None:
@@ -182,7 +183,7 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
     cart = user_data.setdefault(user_id, {})
     data = callback.data or ""
     if data == "home":
-        await edit_message(message, "☕ *NEWCAFE bosh sahifasi*\n\nKerakli bo'limni tanlang:", inline_menu())
+        await edit_message(message, "☕ *NEWCAFE bosh sahifasi*\n\nKerakli bo‘limni tanlang:", inline_menu())
     elif data == "products":
         await show_products(message)
     elif data.startswith("product:"):
@@ -192,7 +193,7 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
             await callback.answer("Mahsulot topilmadi.", show_alert=True)
             return
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="➕ Savatchaga qo'shish", callback_data=f"add:{key}")],
+            [InlineKeyboardButton(text="➕ Savatchaga qo‘shish", callback_data=f"add:{key}")],
             [InlineKeyboardButton(text="⬅️ Mahsulotlarga qaytish", callback_data="products")],
             [InlineKeyboardButton(text="🏠 Bosh menyu", callback_data="home")],
         ])
@@ -205,7 +206,7 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
             return
         cart[key] = min(cart.get(key, 0) + 1, 99)
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🛍 Savatchani ko'rish", callback_data="cart")],
+            [InlineKeyboardButton(text="🛍 Savatchani ko‘rish", callback_data="cart")],
             [InlineKeyboardButton(text="☕ Davom etish", callback_data="products")],
             [InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")],
         ])
@@ -219,26 +220,37 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
         if not cart:
             await show_cart(message, cart)
             return
-        total = sum(PRODUCTS[key]["price"] * quantity for key, quantity in cart.items())
+        lines = []
+        total = 0
+        for key, quantity in cart.items():
+            item = PRODUCTS[key]
+            subtotal = item["price"] * quantity
+            total += subtotal
+            lines.append(f'{item["emoji"]} {item["name"]} × {quantity} — {money(subtotal)}')
+        receipt = "\n".join(lines)
         await edit_message(
             message,
-            f"🎉 *Demo buyurtma tayyor!*\n\nBuyurtma summasi: *{money(total)}*\n\nBu faqat namoyish. To'lov yoki haqiqiy yetkazib berish amalga oshirilmaydi.",
+            "🎉 *Rahmat, buyurtmangiz qabul qilindi!*\n\n"
+            f"{receipt}\n\n"
+            f"💳 *Jami: {money(total)}*\n\n"
+            "☕ NEWCAFE’ni tanlaganingiz uchun rahmat! Yana ko‘rishguncha.\n\n"
+            "_Bu demo buyurtma: haqiqiy to‘lov yoki yetkazib berish amalga oshirilmaydi._",
             InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="☕ Yana buyurtma berish", callback_data="products")],
                 [InlineKeyboardButton(text="🏠 Bosh menyu", callback_data="home")],
-                [InlineKeyboardButton(text="☕ Yangi buyurtma", callback_data="products")],
             ]),
         )
         cart.clear()
     elif data == "promo":
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="☕ Mahsulotlarni ko'rish", callback_data="products")],
+            [InlineKeyboardButton(text="☕ Mahsulotlarni ko‘rish", callback_data="products")],
             [InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")],
         ])
         await edit_message(message, "🎁 *NEWCAFE aksiyalari*\n\nBu demo loyihada aksiya va chegirmalar namunaviy.", keyboard)
     elif data == "about":
         await edit_message(
             message,
-            "ℹ️ *NEWCAFE haqida*\n\nNEWCAFE — o'quv loyihasi uchun yaratilgan zamonaviy qahva brendi konsepsiyasi.\nBizning shiorimiz: *A New Taste. A New Energy.*\n\n_Bu bot demo maqsadida yaratilgan._",
+            "ℹ️ *NEWCAFE haqida*\n\nNEWCAFE — o‘quv loyihasi uchun yaratilgan zamonaviy qahva brendi konsepsiyasi.\nBizning shiorimiz: *A New Taste. A New Energy.*\n\n_Bu bot demo maqsadida yaratilgan._",
             InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")]]),
         )
     elif data == "contact":
@@ -254,24 +266,24 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
 async def handle_web_app_data(message: Message, bot: Bot) -> None:
     raw_data = message.web_app_data.data if message.web_app_data else ""
     if len(raw_data) > 4096:
-        await message.answer("Buyurtma ma'lumoti juda katta yoki noto'g'ri.")
+        await message.answer("Buyurtma ma'lumoti juda katta yoki noto‘g‘ri.")
         return
     try:
         payload = json.loads(raw_data)
     except (json.JSONDecodeError, TypeError):
-        await message.answer("Buyurtma ma'lumotini o'qib bo'lmadi. Iltimos, qayta urinib ko'ring.")
+        await message.answer("Buyurtma ma'lumotini o‘qib bo‘lmadi. Iltimos, qayta urinib ko‘ring.")
         return
     if not isinstance(payload, dict) or payload.get("type") != "demo_order":
-        await message.answer("Noma'lum Mini App so'rovi.")
+        await message.answer("Noma'lum Mini App so‘rovi.")
         return
     raw_items = payload.get("items")
     if not isinstance(raw_items, list) or not raw_items or len(raw_items) > len(PRODUCTS):
-        await message.answer("Savatchada mahsulot yo'q yoki buyurtma noto'g'ri.")
+        await message.answer("Savatchada mahsulot yo‘q yoki buyurtma noto‘g‘ri.")
         return
     quantities: dict[str, int] = {}
     for row in raw_items:
         if not isinstance(row, dict):
-            await message.answer("Buyurtma tarkibi noto'g'ri.")
+            await message.answer("Buyurtma tarkibi noto‘g‘ri.")
             return
         key = row.get("id")
         quantity = row.get("qty")
@@ -283,9 +295,16 @@ async def handle_web_app_data(message: Message, bot: Bot) -> None:
             await message.answer("Mahsulot miqdori ruxsat etilgan chegaradan oshdi.")
             return
     total = sum(PRODUCTS[key]["price"] * quantity for key, quantity in quantities.items())
-    details = "\n".join(f'{PRODUCTS[key]["name"]} × {quantity} — {money(PRODUCTS[key]["price"] * quantity)}' for key, quantity in quantities.items())
+    details = "\n".join(
+        f'{PRODUCTS[key]["emoji"]} {PRODUCTS[key]["name"]} × {quantity} — {money(PRODUCTS[key]["price"] * quantity)}'
+        for key, quantity in quantities.items()
+    )
     await message.answer(
-        f"✅ Rahmat! Buyurtmangiz qabul qilindi.\n\n{details}\n\nJami: {money(total)}\n\nBu namoyish loyihasi bo‘lib, to‘lov va yetkazib berish amalga oshirilmaydi."
+        "🎉 Rahmat, buyurtmangiz qabul qilindi!\n\n"
+        f"{details}\n\n"
+        f"💳 Jami: {money(total)}\n\n"
+        "☕ NEWCAFE’ni tanlaganingiz uchun rahmat! Yana ko‘rishguncha.\n\n"
+        "Bu demo buyurtma: haqiqiy to‘lov yoki yetkazib berish amalga oshirilmaydi."
     )
 
 
@@ -299,15 +318,8 @@ async def health_handler(_: web.Request) -> web.Response:
 
 async def run() -> None:
     token = os.getenv("BOT_TOKEN", "").strip()
-    admin_id_value = os.getenv("ADMIN_ID", "").strip()
     if not token:
         raise RuntimeError("BOT_TOKEN is required. Set it in your environment; never commit it to GitHub.")
-    if not admin_id_value:
-        raise RuntimeError("ADMIN_ID is required. Set it to the numeric Telegram user ID of the bot administrator.")
-    try:
-        int(admin_id_value)
-    except ValueError as exc:
-        raise RuntimeError("ADMIN_ID must be a numeric Telegram user ID.") from exc
     if not INDEX_FILE.is_file():
         raise RuntimeError(f"Mini App file not found: {INDEX_FILE}")
     port = int(os.getenv("PORT", "8080"))
