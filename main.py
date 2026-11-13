@@ -77,11 +77,13 @@ def mini_app_url() -> str | None:
 
 
 def inline_menu() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
-        [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
-        [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
-    ])
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
+            [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
+            [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
+        ]
+    )
 
 
 def app_keyboard() -> ReplyKeyboardMarkup | None:
@@ -217,6 +219,12 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
             await show_cart(message, cart)
             return
         receipt, total = order_receipt(cart)
+        logger.info(
+            "NEWCAFE order | user_id=%s | items=%s | total=%s",
+            user_id,
+            dict(cart),
+            total,
+        )
         text = (
             "🎉 *Rahmat, buyurtmangiz qabul qilindi!*\n\n"
             f"{receipt}\n\n"
@@ -283,6 +291,12 @@ async def handle_web_app_data(message: Message, bot: Bot) -> None:
             await message.answer("Mahsulot miqdori ruxsat etilgan chegaradan oshdi.")
             return
     receipt, total = order_receipt(quantities)
+    logger.info(
+        "Mini App NEWCAFE order | user_id=%s | items=%s | total=%s",
+        message.from_user.id if message.from_user else "unknown",
+        quantities,
+        total,
+    )
     await message.answer(
         "🎉 Rahmat, buyurtmangiz qabul qilindi!\n\n"
         f"{receipt}\n\n"
