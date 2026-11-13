@@ -55,6 +55,17 @@ def money(value: int) -> str:
     return f"{value:,}".replace(",", " ") + " so'm"
 
 
+def order_receipt(quantities: dict[str, int]) -> tuple[str, int]:
+    lines = []
+    total = 0
+    for key, quantity in quantities.items():
+        item = PRODUCTS[key]
+        subtotal = item["price"] * quantity
+        total += subtotal
+        lines.append(f'{item["emoji"]} {item["name"]} × {quantity} — {money(subtotal)}')
+    return "\n".join(lines), total
+
+
 def mini_app_url() -> str | None:
     configured_url = os.getenv("MINI_APP_URL", "").strip()
     if configured_url:
@@ -66,13 +77,11 @@ def mini_app_url() -> str | None:
 
 
 def inline_menu() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
-            [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
-            [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
-        ]
-    )
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
+        [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
+        [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
+    ])
 
 
 def app_keyboard() -> ReplyKeyboardMarkup | None:
@@ -123,14 +132,8 @@ async def show_cart(message: Message, cart: dict[str, int]) -> None:
         ])
         await edit_message(message, "🛍 *Savatchangiz hozircha bo'sh.*\nMahsulotlar bo'limidan qahva tanlang.", keyboard)
         return
-    lines = []
-    total = 0
-    for key, quantity in cart.items():
-        item = PRODUCTS[key]
-        subtotal = item["price"] * quantity
-        total += subtotal
-        lines.append(f'{item["emoji"]} {item["name"]} × {quantity} — {money(subtotal)}')
-    text = "🛍 *Savatchangiz*\n\n" + "\n".join(lines) + f"\n\n*Jami: {money(total)}*"
+    lines, total = order_receipt(cart)
+    text = f"🛍 *Savatchangiz*\n\n{lines}\n\n*Jami: {money(total)}*"
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="✅ Buyurtmani tasdiqlash", callback_data="checkout")],
         [InlineKeyboardButton(text="🗑 Savatchani tozalash", callback_data="clear")],
@@ -141,7 +144,6 @@ async def show_cart(message: Message, cart: dict[str, int]) -> None:
 
 
 async def start(message: Message) -> None:
-    banner = ASSETS_DIR / "newcafe_banner.jpg"
     text = (
         "☕ Assalomu alaykum!\n\n"
         "NEWCAFE botiga xush kelibsiz! 👑\n\n"
@@ -152,25 +154,18 @@ async def start(message: Message) -> None:
         "NEWCAFE — Good Coffee, Good Mood!\n\n"
         "👇 Menyuni ochish uchun tugmani bosing."
     )
+    banner = ASSETS_DIR / "newcafe_banner.jpg"
     if banner.is_file():
         await message.answer_photo(banner, caption=text, reply_markup=inline_menu())
     else:
         await message.answer(text, reply_markup=inline_menu())
-    web_keyboard = app_keyboard()
-    if web_keyboard:
-        await message.answer("🌐 To‘liq Mini App menyusini ham ochishingiz mumkin:", reply_markup=web_keyboard)
-    elif not mini_app_url():
-        logger.warning("MINI_APP_URL is not set; Mini App launch button will not be shown.")
+    keyboard = app_keyboard()
+    if keyboard:
+        await message.answer("🌐 To‘liq Mini App menyusini ochish:", reply_markup=keyboard)
 
 
 async def help_command(message: Message) -> None:
     await message.answer("Buyruqlar: /start — bosh menyu, /help — yordam, /admin — administrator ma'lumoti.")
-
-
-async def callback_handler(message: Message, callback_data: str, bot: Bot) -> None:
-    user_id = message.from_user.id if message.from_user else 0
-    user_data = bot
-    del user_id, callback_data, user_data
 
 
 async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
@@ -182,6 +177,7 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
     user_data = dispatcher.workflow_data.setdefault("user_data", {})
     cart = user_data.setdefault(user_id, {})
     data = callback.data or ""
+
     if data == "home":
         await edit_message(message, "☕ *NEWCAFE bosh sahifasi*\n\nKerakli bo‘limni tanlang:", inline_menu())
     elif data == "products":
@@ -220,27 +216,20 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
         if not cart:
             await show_cart(message, cart)
             return
-        lines = []
-        total = 0
-        for key, quantity in cart.items():
-            item = PRODUCTS[key]
-            subtotal = item["price"] * quantity
-            total += subtotal
-            lines.append(f'{item["emoji"]} {item["name"]} × {quantity} — {money(subtotal)}')
-        receipt = "\n".join(lines)
-        await edit_message(
-            message,
+        receipt, total = order_receipt(cart)
+        text = (
             "🎉 *Rahmat, buyurtmangiz qabul qilindi!*\n\n"
             f"{receipt}\n\n"
             f"💳 *Jami: {money(total)}*\n\n"
             "☕ NEWCAFE’ni tanlaganingiz uchun rahmat! Yana ko‘rishguncha.\n\n"
-            "_Bu demo buyurtma: haqiqiy to‘lov yoki yetkazib berish amalga oshirilmaydi._",
-            InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="☕ Yana buyurtma berish", callback_data="products")],
-                [InlineKeyboardButton(text="🏠 Bosh menyu", callback_data="home")],
-            ]),
+            "_Bu demo buyurtma: haqiqiy to‘lov yoki yetkazib berish amalga oshirilmaydi._"
         )
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="☕ Yana buyurtma berish", callback_data="products")],
+            [InlineKeyboardButton(text="🏠 Bosh menyu", callback_data="home")],
+        ])
         cart.clear()
+        await edit_message(message, text, keyboard)
     elif data == "promo":
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="☕ Mahsulotlarni ko‘rish", callback_data="products")],
@@ -250,13 +239,13 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
     elif data == "about":
         await edit_message(
             message,
-            "ℹ️ *NEWCAFE haqida*\n\nNEWCAFE — o‘quv loyihasi uchun yaratilgan zamonaviy qahva brendi konsepsiyasi.\nBizning shiorimiz: *A New Taste. A New Energy.*\n\n_Bu bot demo maqsadida yaratilgan._",
+            "ℹ️ *NEWCAFE haqida*\n\nNEWCAFE — mazali qahva va yoqimli kayfiyat.\nBizning shiorimiz: *Good Coffee, Good Mood!*",
             InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")]]),
         )
     elif data == "contact":
         await edit_message(
             message,
-            "📞 *Aloqa*\n\nDemo loyiha uchun:\nTelegram: @newcafe_demo\nEmail: hello@newcafe.example\n\n_Bu kontaktlar namunaviy._",
+            "📞 *Aloqa*\n\nSavollaringiz bo‘lsa, bot administratoriga murojaat qiling.",
             InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")]]),
         )
     else:
@@ -285,8 +274,7 @@ async def handle_web_app_data(message: Message, bot: Bot) -> None:
         if not isinstance(row, dict):
             await message.answer("Buyurtma tarkibi noto‘g‘ri.")
             return
-        key = row.get("id")
-        quantity = row.get("qty")
+        key, quantity = row.get("id"), row.get("qty")
         if key not in PRODUCTS or not isinstance(quantity, int) or isinstance(quantity, bool) or not 1 <= quantity <= 99:
             await message.answer("Buyurtmada noma'lum mahsulot yoki miqdor bor.")
             return
@@ -294,14 +282,10 @@ async def handle_web_app_data(message: Message, bot: Bot) -> None:
         if quantities[key] > 99:
             await message.answer("Mahsulot miqdori ruxsat etilgan chegaradan oshdi.")
             return
-    total = sum(PRODUCTS[key]["price"] * quantity for key, quantity in quantities.items())
-    details = "\n".join(
-        f'{PRODUCTS[key]["emoji"]} {PRODUCTS[key]["name"]} × {quantity} — {money(PRODUCTS[key]["price"] * quantity)}'
-        for key, quantity in quantities.items()
-    )
+    receipt, total = order_receipt(quantities)
     await message.answer(
         "🎉 Rahmat, buyurtmangiz qabul qilindi!\n\n"
-        f"{details}\n\n"
+        f"{receipt}\n\n"
         f"💳 Jami: {money(total)}\n\n"
         "☕ NEWCAFE’ni tanlaganingiz uchun rahmat! Yana ko‘rishguncha.\n\n"
         "Bu demo buyurtma: haqiqiy to‘lov yoki yetkazib berish amalga oshirilmaydi."

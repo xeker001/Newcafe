@@ -16,6 +16,6 @@ async def admin_command(message: Message) -> None:
 
     await message.answer(
         "🛠 NEWCAFE administrator paneli\n\n"
-        "Bot ishlayapti. Demo buyurtmalar shu chatga yuboriladi.\n"
+        "Bot ishlayapti. Buyurtmalar mijozga tasdiq xabari sifatida bot ichida ko‘rsatiladi.\n"
         "Buyurtmalar doimiy saqlanmaydi; loyiha ma'lumotlar bazasidan foydalanmaydi."
     )
