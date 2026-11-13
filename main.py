@@ -68,7 +68,7 @@ def mini_app_url() -> str | None:
 def inline_menu() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="☕ Mahsulotlar", callback_data="products")],
+            [InlineKeyboardButton(text="👇 Menyuni ochish", callback_data="products")],
             [InlineKeyboardButton(text="🛍 Savatcham", callback_data="cart"), InlineKeyboardButton(text="🎁 Aksiya", callback_data="promo")],
             [InlineKeyboardButton(text="ℹ️ Biz haqimizda", callback_data="about"), InlineKeyboardButton(text="📞 Aloqa", callback_data="contact")],
         ]
@@ -143,10 +143,14 @@ async def show_cart(message: Message, cart: dict[str, int]) -> None:
 async def start(message: Message) -> None:
     banner = ASSETS_DIR / "newcafe_banner.jpg"
     text = (
-        "☕ *NEWCAFE ga xush kelibsiz!*\n\n"
-        "Yangi ta'm. Yangi energiya.\n"
-        "Mahsulotlarimiz bilan tanishing yoki demo buyurtma yarating.\n\n"
-        "_Bu o'quv loyihasi uchun namoyish botidir._"
+        "☕ Assalomu alaykum!\n\n"
+        "NEWCAFE botiga xush kelibsiz! 👑\n\n"
+        "Bu yerda siz:\n"
+        "☕ Mazali kofelar menyusini ko'rishingiz;\n"
+        "🛒 O'zingizga yoqqan ichimlikni tanlashingiz;\n"
+        "✨ Yangi ta'mlardan bahramand bo'lishingiz mumkin.\n\n"
+        "NEWCAFE — Good Coffee, Good Mood!\n\n"
+        "👇 Menyuni ochish uchun tugmani bosing."
     )
     if banner.is_file():
         await message.answer_photo(banner, caption=text, reply_markup=inline_menu(), parse_mode=ParseMode.MARKDOWN)
@@ -238,7 +242,7 @@ async def handle_callback(callback, dispatcher: Dispatcher, bot: Bot) -> None:
     elif data == "about":
         await edit_message(
             message,
-            "ℹ️ *NEWCAFE haqida*\n\nNEWCAFE — o'quv loyihasi uchun yaratilgan zamonaviy qahva brendi konsepsiyasi.\nBizning shiorimiz: *A New Taste. A New Energy.*\n\n_Bu bot demo maqsadida ishlaydi._",
+            "ℹ️ *NEWCAFE haqida*\n\nNEWCAFE — o'quv loyihasi uchun yaratilgan zamonaviy qahva brendi konsepsiyasi.\nBizning shiorimiz: *A New Taste. A New Energy.*\n\n_Bu bot demo maqsadida yaratilgan._",
             InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Bosh menyu", callback_data="home")]]),
         )
     elif data == "contact":
